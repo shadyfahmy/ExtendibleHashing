@@ -27,7 +27,7 @@ int main(void)
             cin >> val;
         }
 
-        switch (key)
+        switch (operation)
         {
         case 1:
             dir.search(key);
