@@ -13,7 +13,7 @@ class Directory
 public:
     /* data */
     int globalDepth;
-    DirElement* elements[MAX_NUMBER_OF_ELEMENTS];
+    DirElement elements[MAX_NUMBER_OF_ELEMENTS];
     
     Directory(/* args */);
     void Duplicate(int fd);            // This function duplicates directory
