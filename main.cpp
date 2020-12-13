@@ -26,12 +26,13 @@ int main(void)
             cout<<"Enter a value" << endl;
             cin >> val;
         }
+        
         Record r;
         r.key = key;
         r.valid = 1;
         r.value = val;
         int count = 0;
-        switch (key)
+        switch (operation)
         {
         case 1:
             searchItem(directoryFileHandler , bucketsFileHandler, r, &count);
