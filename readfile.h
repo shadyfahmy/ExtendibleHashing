@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+using namespace std;
 
 #include "Bucket.h"
 #include "Directory.h"
