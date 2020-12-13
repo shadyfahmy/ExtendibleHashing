@@ -14,8 +14,7 @@ public:
     /* data */
     int globalDepth;
     DirElement* elements[MAX_NUMBER_OF_ELEMENTS];
-
-public:
+    
     Directory(/* args */);
     void Duplicate(int fd);            // This function duplicates directory
     void Shrink(int fd);               // This function shrinks directory

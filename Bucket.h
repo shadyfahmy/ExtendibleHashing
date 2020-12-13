@@ -21,7 +21,6 @@ public:
     int localDepth;
     Record records[RECORDS_PER_BUCKET];
 
-public:
     Bucket(/* args */);
     void insertRecord(int,int);
     ~Bucket();
