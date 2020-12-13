@@ -1,4 +1,4 @@
-#include"directory.h"
+#include "readfile.h"
 #include<iostream>
 
 using namespace std;
@@ -6,8 +6,8 @@ using namespace std;
 int main(void)
 {
 
-    directory dir;
-
+    int directoryFileHandler = createFile(DIRECTORY_FILESIZE,"Directory");
+    int bucketsFileHandler = createFile(BUCKETS_FILESIZE,"Buckets");
 
     while(1){
         int operation;
@@ -26,24 +26,30 @@ int main(void)
             cout<<"Enter a value" << endl;
             cin >> val;
         }
-
+        Record r;
+        r.key = key;
+        r.valid = 1;
+        r.value = val;
+        int count = 0;
         switch (key)
         {
         case 1:
-            dir.search(key);
+            searchItem(directoryFileHandler , bucketsFileHandler, r, &count);
             break;
                 
         case 2:
-            dir.insert(key,val);
+            insertItem(directoryFileHandler , bucketsFileHandler, r);
             break;
 
         case 3:
-            dir.remove(key);
+            deleteItem(directoryFileHandler , bucketsFileHandler, r, &count);
             break;    
 
         default:
             break;
         }
+        // Display directory and buckets
+        display(directoryFileHandler, bucketsFileHandler);
     }
 
 
