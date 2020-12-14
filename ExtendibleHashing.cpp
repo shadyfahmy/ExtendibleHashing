@@ -225,6 +225,8 @@ int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
    pread(bucketsFd,&data,sizeof(Bucket), Offset);
    data.deleteRecord(item);
    pwrite(bucketsFd,&data,sizeof(Bucket), Offset);
+   std::cout<<data.records[0].key<<endl;
+   std::cout<<data.records[1].key<<endl;
 
    /*   if the bucket still not empty nothing needs to be done   */
    if(data.currentIndex > 0) {

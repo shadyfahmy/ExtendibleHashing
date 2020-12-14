@@ -57,6 +57,7 @@ void Directory::Merge(int bucketsFd){
                 if(dataBefore.currentIndex > 0) {
                     int startIndex = (i >> (shiftValue-1))<<(shiftValue-1);     //this line makes sure we will start at right index of all of those elements points to the same buckets(ex case of 4)
                     int endIndex = startIndex + pow(2,shiftValue-1);
+                    /*   this loop if there is more than one element points to the same empty bucket all will points to the split image   */
                     for(int j=startIndex;j<endIndex;j++) {
                         elements[j].bucketOffset = elements[before].bucketOffset;
                     }
@@ -72,6 +73,7 @@ void Directory::Merge(int bucketsFd){
                 if(dataAfter.currentIndex > 0) {
                     int startIndex = (i >> (shiftValue-1))<<(shiftValue-1);     //this line makes sure we will start at right index of all of those elements points to the same buckets(ex case of 4)
                     int endIndex = startIndex + pow(2,shiftValue-1);
+                    /*   this loop if there is more than one element points to the same empty bucket all will points to the split image   */
                     for(int j=startIndex;j<endIndex;j++) {
                         elements[j].bucketOffset = elements[after].bucketOffset;
                     }
@@ -95,6 +97,9 @@ void Directory::Shrink(){
 }
 
 void Directory::mergeAndShrink(int bucketsFd){
+
+    Merge(bucketsFd);
+
     bool flage = false;
     for(int i=0; i<currentIndex; i++) {
         Bucket data;
@@ -105,8 +110,6 @@ void Directory::mergeAndShrink(int bucketsFd){
             break;
         }
     }
-
-    Merge(bucketsFd);
 
     if(!flage){
         Shrink();
