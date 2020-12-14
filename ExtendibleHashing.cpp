@@ -189,9 +189,10 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
 
    // Case global depth is equal 0, Read first bucket 
    if(data.globalDepth == 0) {
-      result = pread(bucketsFd,&bucketData,sizeof(Bucket), 0);
+      result = pread(bucketsFd,&bucketData,sizeof(Bucket), data.elements[0].bucketOffset);
       for(int i = 0; i< RECORDS_PER_BUCKET; i++){
          (*count)++;
+         cout << "Valid: " << bucketData.records[i].valid << "- key: " << bucketData.records[i].key  << ",- search key: "<< item.key<< endl;
          if ((bucketData.records[i].valid == 1) && (bucketData.records[i].key == item.key))
             return 0;                                                    // Offset of the bucket
       }
