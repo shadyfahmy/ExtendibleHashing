@@ -11,6 +11,8 @@ using namespace std;
 Bucket::Bucket(/* args */)
 {
     this->currentIndex = 0;
+    for (int i = 0; i < RECORDS_PER_BUCKET; i++)
+      this->records[i].valid = 0;
 }
 
 void Bucket::insertRecord(int key, int val)
