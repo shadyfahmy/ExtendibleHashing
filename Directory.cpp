@@ -89,7 +89,7 @@ bool Directory::EmptyBucket(int bucketsFd) {
 // }
 
 void Directory::Merge(int bucketsFd) {
-    for(int i=0;i<currentIndex-1;i++) {
+    for(int i=0;i<currentIndex-1;i+=2) {
         Bucket data1;
         pread(bucketsFd,&data1,sizeof(Bucket), elements[i].bucketOffset);
 
@@ -127,7 +127,7 @@ void Directory::mergeAndShrink(int bucketsFd){
     // }
 
     bool canShrink = true;
-    for(int i=0; i<currentIndex-1; i++) {
+    for(int i=0; i<currentIndex-1; i+=2) {
         /*   this condition means there is buckets with localdepth same as global and not empty so there is no need for shrink*/
         if(elements[i].bucketOffset != elements[i+1].bucketOffset) {
             canShrink = false;
