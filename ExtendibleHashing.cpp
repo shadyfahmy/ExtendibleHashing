@@ -199,7 +199,7 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
    }
 
    for(int i = 0; i< RECORDS_PER_BUCKET; i++){
-      count++;
+      (*count)++;
       //cout << "Valid: " << bucketData.records[i].valid << "- key: " << bucketData.records[i].key  << ",- search key: "<< item.key<< endl;
       if ((bucketData.records[i].valid == 1) && (bucketData.records[i].key == item.key))
          return data.elements[stoi(keyBits)].bucketOffset; 
