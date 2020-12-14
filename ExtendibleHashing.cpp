@@ -209,10 +209,10 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
 }
 
 int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
-   int * diff = 0;
+   int diff = 0;
 
    /*   search for the item we need to delete   */
-   int Offset = searchItem(dirFd, bucketsFd, item, diff);
+   int Offset = searchItem(dirFd, bucketsFd, item, &diff);
 
    /*   if not found return -1 indicates to error has happend   */
    if(Offset<0) {
@@ -223,7 +223,7 @@ int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
    Bucket data;
    pread(bucketsFd,&data,sizeof(Bucket), Offset);
    data.deleteRecord(item);
-   pwrite(bucketsFd,&data,sizeof(Record), Offset);
+   pwrite(bucketsFd,&data,sizeof(Bucket), Offset);
 
    /*   if the bucket still not empty nothing needs to be done   */
    if(data.currentIndex > 0) {
