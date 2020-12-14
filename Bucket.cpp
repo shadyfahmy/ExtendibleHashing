@@ -68,7 +68,7 @@ Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth,
 
   for(int i = 0; i < RECORDS_PER_BUCKET; i++)
   {
-    if((hashCode(this->records[i].key) >> (MAX_BITS_IN_DIRECTORY - globalDepth)) != bucketNumber)
+    if((hashCode(this->records[i].key) >> (MAX_BITS_IN_DIRECTORY - globalDepth)) >= newNumber)
     {
       b->insertRecord(this->records[i].key, this->records[i].value);
       this->deleteRecord(this->records[i]);
@@ -76,12 +76,12 @@ Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth,
   }
 
   int hash = hashCode(key);
-  if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == bucketNumber && this->currentIndex < RECORDS_PER_BUCKET)
+  if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) < newNumber && this->currentIndex < RECORDS_PER_BUCKET)
   {
     this->insertRecord(key, val);
     *inserted = true;
   }
-  else if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == newNumber && b->currentIndex < RECORDS_PER_BUCKET)
+  else if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) >= newNumber && b->currentIndex < RECORDS_PER_BUCKET)
   {
     b->insertRecord(key, val);
     *inserted = true;
