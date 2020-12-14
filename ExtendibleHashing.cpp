@@ -192,9 +192,9 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
       result = pread(bucketsFd,&bucketData,sizeof(Bucket), data.elements[0].bucketOffset);
       for(int i = 0; i< RECORDS_PER_BUCKET; i++){
          (*count)++;
-         cout << "Valid: " << bucketData.records[i].valid << "- key: " << bucketData.records[i].key  << ",- search key: "<< item.key<< endl;
+         //cout << "Valid: " << bucketData.records[i].valid << "- key: " << bucketData.records[i].key  << ",- search key: "<< item.key<< endl;
          if ((bucketData.records[i].valid == 1) && (bucketData.records[i].key == item.key))
-            return 0;                                                    // Offset of the bucket
+            return data.elements[0].bucketOffset;                                               // Offset of the bucket
       }
       // Item not found 
       return -1;
@@ -231,7 +231,7 @@ int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
 
    /*   search for the item we need to delete   */
    int Offset = searchItem(dirFd, bucketsFd, item, &diff);
-
+   cout<<Offset<<endl;
    /*   if not found return -1 indicates to error has happend   */
    if(Offset<0) {
       return -1;
@@ -242,8 +242,8 @@ int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
    pread(bucketsFd,&data,sizeof(Bucket), Offset);
    data.deleteRecord(item);
    pwrite(bucketsFd,&data,sizeof(Bucket), Offset);
-   std::cout<<data.records[0].key<<endl;
-   std::cout<<data.records[1].key<<endl;
+   cout<<data.records[0].key<<endl;
+   cout<<data.records[1].key<<endl;
 
    /*   if the bucket still not empty nothing needs to be done   */
    if(data.currentIndex > 0) {
