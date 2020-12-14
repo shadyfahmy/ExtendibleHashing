@@ -202,12 +202,13 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
 
    // Case any depth
    int hashedKey = hashCode(item.key);
+   int target = hashedKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
    //cout << "Hashed Key: " << hashedKey << endl;
    bitset<MAX_BITS_IN_DIRECTORY> x(hashedKey);
    string keyBits = x.to_string().substr(0,data.globalDepth);
    // cout << "Key bits: " << keyBits << endl;
 
-   result = pread(bucketsFd,&bucketData,sizeof(Bucket), data.elements[stoi(keyBits)].bucketOffset);
+   result = pread(bucketsFd,&bucketData,sizeof(Bucket), data.elements[target].bucketOffset);
    if(result < 0)
    { 	  
       perror("some error occurred in pread");
@@ -218,7 +219,7 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
       (*count)++;
       //cout << "Valid: " << bucketData.records[i].valid << "- key: " << bucketData.records[i].key  << ",- search key: "<< item.key<< endl;
       if ((bucketData.records[i].valid == 1) && (bucketData.records[i].key == item.key))
-         return data.elements[stoi(keyBits)].bucketOffset; 
+         return data.elements[target].bucketOffset; 
    }
    // Not found.
    return -1; 
