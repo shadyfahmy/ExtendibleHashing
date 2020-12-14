@@ -8,6 +8,7 @@ class DirElement{
         int bucketOffset;
 };
 
+
 class Directory
 {
 public:
@@ -22,4 +23,3 @@ public:
     void mergeAndShrink(int bucketsFd);
     ~Directory();
 };
-

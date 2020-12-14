@@ -1,4 +1,4 @@
-#include "Directory.h"
+//#include "Directory.h"
 #include "Bucket.h"
 #include "readfile.h"
 
@@ -29,7 +29,7 @@ void Directory::mergeAndShrink(int bucketsFd){
     }
 
     if(flage){
-        Merge();
+        //Merge();
     } else {
         Shrink();
     }
