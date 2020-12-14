@@ -169,13 +169,14 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
    Directory data;
    Bucket bucketData;
    ssize_t result = pread(dirFd,&data,sizeof(Directory), 0);
+   *count = 0;
 
    // Case global depth is equal 0, Read first bucket 
    if(data.globalDepth == 0) {
-      result = pread(dirFd,&bucketData,sizeof(Bucket), 0);
+      result = pread(bucketsFd,&bucketData,sizeof(Bucket), 0);
       for(int i = 0; i< RECORDS_PER_BUCKET; i++){
-         count++;
-         if ((bucketData.records[1].valid == 1) && (bucketData.records[1].key == item.key))
+         (*count)++;
+         if ((bucketData.records[i].valid == 1) && (bucketData.records[i].key == item.key))
             return 0;                                                    // Offset of the bucket
       }
       // Item not found 
@@ -252,8 +253,9 @@ int display(int dirFd, int bucketsFd){
       cout << endl;
       for(int i =0; i< (int)pow(2,data.globalDepth); i++)
       {
-         bitset<MAX_BITS_IN_DIRECTORY> x(data.elements[i].key);
-         cout << "Element#" << i+1 << "  Key= " << x.to_string().substr(MAX_BITS_IN_DIRECTORY-data.globalDepth,MAX_BITS_IN_DIRECTORY-1)  << ", Offset= " << data.elements[i].bucketOffset << endl;
+         bitset<MAX_BITS_IN_DIRECTORY> x(i);
+         if(data.globalDepth != 0)
+            cout << "Element#" << i+1 << "  Key= " << x.to_string().substr(MAX_BITS_IN_DIRECTORY-data.globalDepth,MAX_BITS_IN_DIRECTORY-1)  << ", Offset= " << data.elements[i].bucketOffset << endl;
          ssize_t result = pread(bucketsFd,&bucketData,sizeof(Bucket), data.elements[i].bucketOffset);
          cout << "Bucket Data: Local Depth=" << bucketData.localDepth << endl;
          for(int j=0; j< RECORDS_PER_BUCKET; j++){

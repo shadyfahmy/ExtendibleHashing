@@ -11,7 +11,6 @@
 
 class DirElement{
     public:
-        int key;
         int bucketOffset;
 };
 

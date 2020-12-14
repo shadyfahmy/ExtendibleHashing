@@ -13,11 +13,12 @@ int main(void)
     int directoryFileHandler = createFile(DIRECTORY_FILESIZE,"Directory");
     int bucketsFileHandler = createFile(BUCKETS_FILESIZE,"Buckets");
     int result;
+    bool run=true;
 
     //Test(directoryFileHandler,  bucketsFileHandler);
     display(directoryFileHandler, bucketsFileHandler);
 
-    while(1){
+    while(run){
         int operation;
         int key;
         int val;
@@ -27,9 +28,11 @@ int main(void)
         cout << "2 -> Insert" << endl;
         cout << "3 -> Delete" << endl;
         cout << "4 -> Display" << endl;
+        cout << "5 -> Exit" << endl;
         cin >> operation;
-        cout << "Enter a key" << endl;
-        if(operation != 4) {
+        
+        if(operation != 4 && operation != 5) {
+            cout << "Enter a key" << endl;
             cin >> key;
             if(operation == 2)
             {
@@ -65,6 +68,17 @@ int main(void)
             cout << "Number of records accessed is " << result << endl;
             break; 
 
+        case 5:
+            run = false;
+            // Display directory and buckets
+            result = display(directoryFileHandler, bucketsFileHandler);
+            cout << "Number of records accessed is " << result << endl;
+            close(directoryFileHandler);
+            close(bucketsFileHandler);
+            remove("Directory");
+            remove("Buckets");
+            break; 
+
         default:
             break;
         }
@@ -79,16 +93,12 @@ int main(void)
 void Test(int directoryFileHandler, int bucketsFileHandler){ 
     Directory dir;
     dir.globalDepth = 2;
-    dir.elements[0].key = 0;
     dir.elements[0].bucketOffset = 0;
 
-    dir.elements[1].key = 1;
     dir.elements[1].bucketOffset = 40;
     
-    dir.elements[2].key = 2;
     dir.elements[2].bucketOffset = 80;
 
-    dir.elements[3].key = 3;
     dir.elements[3].bucketOffset = 120;
     int result = pwrite(directoryFileHandler,&dir,sizeof(Directory), 0);
 
