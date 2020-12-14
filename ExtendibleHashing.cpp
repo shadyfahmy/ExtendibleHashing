@@ -232,6 +232,7 @@ int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
    Directory dir;
    pread(dirFd,&dir,sizeof(Directory), 0);
    dir.mergeAndShrink(bucketsFd);
+   pwrite(dirFd,&dir,sizeof(Directory), 0);
 }
 
 

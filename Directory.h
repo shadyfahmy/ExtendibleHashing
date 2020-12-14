@@ -18,8 +18,10 @@ public:
     DirElement elements[MAX_NUMBER_OF_ELEMENTS];
     
     Directory(/* args */);
-    void Duplicate(int fd);            // This function duplicates directory
-    void Shrink();               // This function shrinks directory
+    void Duplicate(int fd);             // This function duplicates directory
+    bool EmptyBucket(int bucketsFd);
+    void Merge(int bucketsFd);
+    void Shrink();                      // This function shrinks directory
     void mergeAndShrink(int bucketsFd);
     ~Directory();
 };

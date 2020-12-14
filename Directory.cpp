@@ -31,8 +31,66 @@ void Directory::Duplicate(int fd)
     */
 }
 
-void Directory::Shrink(){
+bool Directory::EmptyBucket(int bucketsFd) {
+    for(int i=0;i<currentIndex;i++){
+        Bucket data;
+        pread(bucketsFd,&data,sizeof(Bucket), elements[i].bucketOffset);
+        if(data.currentIndex == 0) {
+            return true;
+        }
+    }
+    return false;
+}
 
+void Directory::Merge(int bucketsFd){
+    /*   this while loop made for more than one elements points to the same bucket that has been deleted*/
+    int shiftValue = 1;
+    for(int i=0;i<currentIndex;i++) {
+        Bucket data;
+        pread(bucketsFd,&data,sizeof(Bucket), elements[i].bucketOffset);
+        if(data.currentIndex == 0) {
+            int before = i-shiftValue;
+            int after = i+shiftValue;
+            
+            if(((before >> shiftValue) == (i >> shiftValue))) {
+                Bucket dataBefore;
+                pread(bucketsFd,&dataBefore,sizeof(Bucket), elements[before].bucketOffset);
+                if(dataBefore.currentIndex > 0) {
+                    int startIndex = (i >> (shiftValue-1))<<(shiftValue-1);     //this line makes sure we will start at right index of all of those elements points to the same buckets(ex case of 4)
+                    int endIndex = startIndex + pow(2,shiftValue-1);
+                    for(int j=startIndex;j<endIndex;j++) {
+                        elements[j].bucketOffset = elements[before].bucketOffset;
+                    }
+                    dataBefore.localDepth--;
+                    pwrite(bucketsFd,&dataBefore,sizeof(Bucket), elements[before].bucketOffset);
+                    break;
+                } else {
+                    shiftValue++;
+                }
+            } else if ((after >> shiftValue) == (i >> shiftValue)) {
+                Bucket dataAfter;
+                pread(bucketsFd,&dataAfter,sizeof(Bucket), elements[after].bucketOffset);
+                if(dataAfter.currentIndex > 0) {
+                    int startIndex = (i >> (shiftValue-1))<<(shiftValue-1);     //this line makes sure we will start at right index of all of those elements points to the same buckets(ex case of 4)
+                    int endIndex = startIndex + pow(2,shiftValue-1);
+                    for(int j=startIndex;j<endIndex;j++) {
+                        elements[j].bucketOffset = elements[after].bucketOffset;
+                    }
+                    dataAfter.localDepth--;
+                    pwrite(bucketsFd,&dataAfter,sizeof(Bucket), elements[after].bucketOffset);
+                    break;
+                } else {
+                    shiftValue++;
+                }
+            }
+        }
+    }
+}
+
+void Directory::Shrink(){
+    for(int i=0,j=0;i<currentIndex;i++,j+=2){
+        elements[i].bucketOffset = elements[j].bucketOffset;
+    }
 }
 
 void Directory::mergeAndShrink(int bucketsFd){
@@ -47,9 +105,9 @@ void Directory::mergeAndShrink(int bucketsFd){
         }
     }
 
-    if(flage){
-        //Merge();
-    } else {
+    Merge(bucketsFd);
+
+    if(!flage){
         Shrink();
     }
 }
