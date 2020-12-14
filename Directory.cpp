@@ -1,4 +1,4 @@
-//#include "Directory.h"
+#include "Directory.h"
 #include "Bucket.h"
 #include "readfile.h"
 
