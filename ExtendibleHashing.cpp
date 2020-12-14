@@ -109,6 +109,7 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
             {
                targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
                targetOffset = data.elements[targetKey].bucketOffset;
+               result = pread(bucketsFd,&bucketData,sizeof(Bucket), targetOffset);
                int offset;
 
                /*If local depth less than global depth split the bucket*/
@@ -132,8 +133,26 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
                else
                {
                   if(data.globalDepth < MAX_BITS_IN_DIRECTORY)
+                  {
                      data.Duplicate(dirFd);
-
+                         int i = 0;
+                     while (i < data.currentIndex)
+                     {
+                        Bucket temp;
+                        result = pread(bucketsFd, &temp, sizeof(Bucket),i*sizeof(Bucket));
+                        temp.bucketNumber = i;
+                        if(temp.localDepth == data.globalDepth)
+                        {
+                           result = pwrite(bucketsFd,&temp ,sizeof(Bucket), i*sizeof(Bucket));
+                           i++;
+                        }
+                        else
+                        {
+                           result = pwrite(bucketsFd,&temp ,sizeof(Bucket), i*sizeof(Bucket));
+                           i = i + 2^(data.globalDepth - temp.localDepth);
+                        }
+                     }
+                  }
                   /*Can not duplicate the directory --- insertion fails*/
                   else
                      return false;
