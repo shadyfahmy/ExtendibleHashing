@@ -186,10 +186,10 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
 
    // Case any depth
    int hashedKey = hashCode(item.key);
-
+   //cout << "Hashed Key: " << hashedKey << endl;
    bitset<MAX_BITS_IN_DIRECTORY> x(hashedKey);
-   string keyBits = x.to_string().substr(MAX_BITS_IN_DIRECTORY-data.globalDepth,MAX_BITS_IN_DIRECTORY-1);
-   
+   string keyBits = x.to_string().substr(0,data.globalDepth);
+   // cout << "Key bits: " << keyBits << endl;
 
    result = pread(bucketsFd,&bucketData,sizeof(Bucket), data.elements[stoi(keyBits)].bucketOffset);
    if(result < 0)
@@ -200,6 +200,7 @@ int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
 
    for(int i = 0; i< RECORDS_PER_BUCKET; i++){
       count++;
+      //cout << "Valid: " << bucketData.records[i].valid << "- key: " << bucketData.records[i].key  << ",- search key: "<< item.key<< endl;
       if ((bucketData.records[i].valid == 1) && (bucketData.records[i].key == item.key))
          return data.elements[stoi(keyBits)].bucketOffset; 
    }
@@ -258,15 +259,15 @@ int display(int dirFd, int bucketsFd){
       {
          bitset<MAX_BITS_IN_DIRECTORY> x(i);
          if(data.globalDepth != 0)
-            cout << "Element#" << i+1 << "  Key= " << x.to_string().substr(MAX_BITS_IN_DIRECTORY-data.globalDepth,MAX_BITS_IN_DIRECTORY-1)  << ", Offset= " << data.elements[i].bucketOffset << endl;
+            cout << "Element#" << i << "  Key= " << x.to_string().substr(MAX_BITS_IN_DIRECTORY-data.globalDepth,MAX_BITS_IN_DIRECTORY-1)  << ", Offset= " << data.elements[i].bucketOffset << endl;
          ssize_t result = pread(bucketsFd,&bucketData,sizeof(Bucket), data.elements[i].bucketOffset);
          cout << "Bucket Data: Local Depth=" << bucketData.localDepth << endl;
          for(int j=0; j< RECORDS_PER_BUCKET; j++){
             count ++;
             if (bucketData.records[j].valid == 1)
-               cout << "Record#" << i+1 << "  Key= " << bucketData.records[j].key << ", Value=" << bucketData.records[j].value << endl;
+               cout << "Record#" << j+1 << "  Key= " << bucketData.records[j].key << ", Value=" << bucketData.records[j].value << endl;
             else 
-               cout << "Record#" << i+1 << " => empty" << endl;
+               cout << "Record#" << j+1 << " => empty" << endl;
          }
          cout << endl;
       }
