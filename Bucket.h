@@ -30,6 +30,7 @@ public:
     void insertRecord(int,int);
     int hashCode(int key);
     Bucket* splitBucket(int, int,int, int, bool*, int, int*);
+    void adjustRecords(int i);
     void deleteRecord(Record item);
     ~Bucket();
 };

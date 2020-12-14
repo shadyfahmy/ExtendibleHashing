@@ -33,17 +33,27 @@ void Bucket::insertRecord(int key, int val)
     }
 }
 
+void Bucket::adjustRecords(int index) {
+  for(int i=index;i<RECORDS_PER_BUCKET-1;i++) {
+    this->records[i].valid = this->records[i+1].valid;
+    this->records[i].key = this->records[i+1].key;
+    this->records[i].value = this->records[i+1].value;
+  }
+}
+
 void Bucket::deleteRecord(Record item)
 {
     for(int i=0; i<RECORDS_PER_BUCKET; i++) {
       if(this->records[i].key == item.key) {
-        this->records[i].valid = 0;
-        this->records[i].key = -1;
-        this->records[i].value = 0;
         this->currentIndex--;
+        adjustRecords(i);
+        this->records[RECORDS_PER_BUCKET-1].valid = 0;
+        this->records[RECORDS_PER_BUCKET-1].key = -1;
+        this->records[RECORDS_PER_BUCKET-1].value = 0;
         return;
       }
    }
+
 }
 
 Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth, bool* inserted, int bucketsFd, int* offset)
