@@ -8,7 +8,7 @@ int hashCode(int key){
    return key % NUMBER_OF_BUCKETS;
 }
 
-int insertItem(int dirFd, int bucketsFd,Record item)
+bool insertItem(int dirFd, int bucketsFd,Record item)
 {
 
    Directory data;
@@ -60,27 +60,16 @@ int insertItem(int dirFd, int bucketsFd,Record item)
             /*Dublicate the directory*/
             else
             {
-               /*
-               data.resize(2*data.size());
-               for(int i = 0; i < data.size()/2; i++) 
-               {
-                  data[data.size() - 1 - 2*i] = data[data.size()/2- 1 - i] ;
-                  data[data.size() - 1 - 2*i - 1] = data[data.size()/2- 1 - i] ;
-               }
-               globalDepth++;
-               int i = 0;
-               while (i < data.size())
-               {
-                   data[i]->setNumber(i);
-                   if(data[i]->getLocalDepth() == globalDepth)
-                       i++;
-                   else
-                       i = i + 2^(globalDepth - data[i]->getLocalDepth());
-               }
-               */
+               if(data.globalDepth < MAX_BITS_IN_DIRECTORY)
+                  data.Duplicate(dirFd);
 
+               /*Can not duplicate the directory --- insertion fails*/
+               else
+                  break;
+               
             }
          }
+         return inserted;
       }
       
       

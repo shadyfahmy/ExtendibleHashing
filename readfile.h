@@ -26,7 +26,7 @@ using namespace std;
 int createFile(int size, char *);
 
 //Extendible hashing implementation
-int insertItem(int dirFd, int bucketsFd, Record);
+bool insertItem(int dirFd, int bucketsFd, Record);
 int searchItem(int dirFd, int bucketsFd, Record , int *);
 int deleteItem(int dirFd, int bucketsFd, Record , int *);
 int display(int dirFd, int bucketsFd);
