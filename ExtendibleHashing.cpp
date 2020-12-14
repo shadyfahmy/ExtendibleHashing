@@ -16,65 +16,102 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
    ssize_t result = pread(dirFd,&data,sizeof(Directory), 0);
 
    int hashKey = hashCode(item.key);
-   int targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
-   int targetOffset = data.elements[targetKey].bucketOffset;
-   bool inserted = false;
 
-   /*No Directory Exists*/
-   if(data.globalDepth == 0)
+   while(1)
    {
-
-   }
-   /*Directory Exists*/
-   else
-   {
-      /*Read target bucket*/
-      result = pread(bucketsFd,&bucketData,sizeof(Bucket), targetOffset);
-      
-      /*Target bucket has free space*/
-      if(bucketData.currentIndex < RECORDS_PER_BUCKET)
+      /*No Directory Exists*/
+      if(data.globalDepth == 0)
       {
-         bucketData.insertRecord(item.key, item.value);
-         result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), targetOffset);
-         return true;
-      }
-      /*Target bucket is full*/
-      else
-      {
-         inserted = false;
+         result = pread(bucketsFd, &bucketData, sizeof(Bucket),0);
 
-         while(!inserted)
+         /*If empty place exists in initial bucket*/
+         if(bucketData.currentIndex < RECORDS_PER_BUCKET)
          {
-            targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
-                
-            /*If local depth less than global depth split the bucket*/
-            if(bucketData.localDepth < data.globalDepth)
-            {
-               /*
-               Bucket* newBucket = bucketData->splitBucket(key, val, globalDepth, &inserted);
+            bucketData.insertRecord(item.key, item.value);
+            result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), 0);
+            return true;
+         }
+         /*No empty place exists in initial bucket*/
+         else
+         {
+            data.globalDepth = 1;
+            data.currentIndex = 2;
+            bucketData.localDepth = 1;
+            data.elements[0].bucketOffset = 0;
+            int targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
+            bool inserted = false;
 
-               for(int i = 0; i < 2^(globalDepth - newBucket->getLocalDepth()); i++)
-               {
-                  data[newBucket->getNumber() + i] = newBucket;
-               }
-               */
+            //data.elements[1].bucketOffset = sizeof(Bucket);
+
+            int nIndex;
+            Bucket* newBucket = bucketData.splitBucket(item.key, item.value, &nIndex, targetKey, data.globalDepth, &inserted);
+            if(inserted)
+            {
+               return true;
             }
-            /*Dublicate the directory*/
             else
             {
-               if(data.globalDepth < MAX_BITS_IN_DIRECTORY)
-                  data.Duplicate(dirFd);
-
-               /*Can not duplicate the directory --- insertion fails*/
-               else
-                  break;
-               
+               continue;
             }
+
          }
-         return inserted;
+
       }
-      
-      
+      /*Directory Exists*/
+      else
+      {
+         int targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
+         int targetOffset = data.elements[targetKey].bucketOffset;
+         bool inserted = false;
+
+         /*Read target bucket*/
+         result = pread(bucketsFd,&bucketData,sizeof(Bucket), targetOffset);
+
+         /*Target bucket has free space*/
+         if(bucketData.currentIndex < RECORDS_PER_BUCKET)
+         {
+            bucketData.insertRecord(item.key, item.value);
+            result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), targetOffset);
+            return true;
+         }
+
+         /*Target bucket is full*/
+         else
+         {
+            while(!inserted)
+            {
+               targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
+               targetOffset = data.elements[targetKey].bucketOffset;
+
+               /*If local depth less than global depth split the bucket*/
+               if(bucketData.localDepth < data.globalDepth)
+               {
+                  int nIndex;
+                  Bucket* newBucket = bucketData.splitBucket(item.key, item.value, &nIndex, targetKey, data.globalDepth, &inserted);
+
+                  for(int i = 0; i < 2^(data.globalDepth - newBucket->localDepth); i++)
+                  {
+                     //data.elements[nIndex + i].bucketOffset = newBucket;
+                  }
+                  if (inserted)
+                     return true;
+                  continue;
+
+               }
+               /*Dublicate the directory*/
+               else
+               {
+                  if(data.globalDepth < MAX_BITS_IN_DIRECTORY)
+                     data.Duplicate(dirFd);
+
+                  /*Can not duplicate the directory --- insertion fails*/
+                  else
+                     return false;
+
+               }
+            }
+         }      
+      }
    }
 }
 
