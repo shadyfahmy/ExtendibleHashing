@@ -90,6 +90,8 @@ void Directory::Shrink(){
     for(int i=0,j=0;i<currentIndex;i++,j+=2){
         elements[i].bucketOffset = elements[j].bucketOffset;
     }
+    currentIndex /= 2;
+    globalDepth--;
 }
 
 void Directory::mergeAndShrink(int bucketsFd){

@@ -232,8 +232,10 @@ int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
    /*   get the directory data for merge and shrink it after deleting a Bucket*/
    Directory dir;
    pread(dirFd,&dir,sizeof(Directory), 0);
-   dir.mergeAndShrink(bucketsFd);
-   pwrite(dirFd,&dir,sizeof(Directory), 0);
+   if(dir.globalDepth > 0) {
+      dir.mergeAndShrink(bucketsFd);
+      pwrite(dirFd,&dir,sizeof(Directory), 0);
+   }
 }
 
 
