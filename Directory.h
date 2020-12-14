@@ -1,4 +1,11 @@
 #include <bits/stdc++.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
 #define MAX_NUMBER_OF_ELEMENTS  32
 

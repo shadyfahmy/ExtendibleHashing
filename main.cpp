@@ -14,7 +14,7 @@ int main(void)
     int bucketsFileHandler = createFile(BUCKETS_FILESIZE,"Buckets");
     int result;
 
-    Test(directoryFileHandler,  bucketsFileHandler);
+    //Test(directoryFileHandler,  bucketsFileHandler);
     display(directoryFileHandler, bucketsFileHandler);
 
     while(1){
