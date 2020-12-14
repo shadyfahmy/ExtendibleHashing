@@ -46,11 +46,13 @@ void Bucket::deleteRecord(Record item)
    }
 }
 
-Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth, bool* inserted, int bucketsFd, int* offset)
+Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth, bool* inserted, int bucketsFd, int* offset, int targetOffset)
 {
   Bucket* b = new Bucket();
-  int newNumber = bucketNumber + (2^(globalDepth - localDepth))/2;
+  int newNumber = bucketNumber + (int)pow(2,(globalDepth - localDepth))/2;
+  cout << "bucket number"<<bucketNumber<<endl;
   localDepth++;
+  cout << "newNum" << newNumber<<endl;
   b->localDepth = this->localDepth;
   b->bucketNumber = newNumber;
 
@@ -80,6 +82,7 @@ Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth,
   }
   
   int result;
+  result = pwrite(bucketsFd,this ,sizeof(Bucket), targetOffset);
   Bucket bucketData;
   for(int i = 0; i < NUMBER_OF_BUCKETS; i++)
   {
@@ -88,10 +91,13 @@ Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth,
     if(bucketData.localDepth == 0)
     {
       *offset = i*sizeof(Bucket);
-      result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), *offset);
+      result = pwrite(bucketsFd,b ,sizeof(Bucket), *offset);
+      break;
     }
   }
 
+  cout<<"b" << b->records[0].key <<endl;
+  cout<<"b" << b->records[1].key <<endl;
   return b;
 
 }

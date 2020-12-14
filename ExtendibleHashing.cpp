@@ -116,14 +116,21 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
                /*If local depth less than global depth split the bucket*/
                if(bucketData.localDepth < data.globalDepth)
                {
-                  Bucket* newBucket = bucketData.splitBucket(item.key, item.value, bucketData.bucketNumber, data.globalDepth, &inserted, bucketsFd, &offset);
+                  cout << "split"<<endl;
+                  Bucket* newBucket = bucketData.splitBucket(item.key, item.value, bucketData.bucketNumber, data.globalDepth, &inserted, bucketsFd, &offset, targetOffset);
 
-                  for(int i = 0; i < 2^(data.globalDepth - newBucket->localDepth); i++)
+                  for(int i = 0; i < (int)pow(2,(data.globalDepth - newBucket->localDepth)); i++)
                   {
                      data.elements[newBucket->bucketNumber + i].bucketOffset = offset;
+                     cout<<"offset "<< offset<<endl;
+                     cout<<newBucket->bucketNumber<<endl;
+                     cout<<newBucket->localDepth<<endl;
+                     cout<<data.globalDepth<<endl;
+                     cout<<(int)pow(2,(data.globalDepth - newBucket->localDepth))<<endl;
                   }
                   if (inserted)
                   {
+                     cout <<"inserted"<<endl;
                      result = pwrite(dirFd,&data,sizeof(Directory),0);
                      return true;
                   }
@@ -133,24 +140,32 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
                /*Dublicate the directory*/
                else
                {
+                  cout << "dub"<<endl;
                   if(data.globalDepth < MAX_BITS_IN_DIRECTORY)
                   {
                      data.Duplicate(dirFd);
-                         int i = 0;
+                     cout << "dir" << data.globalDepth << " " << data.currentIndex<<endl;
+                     int i = 0;
                      while (i < data.currentIndex)
                      {
                         Bucket temp;
-                        result = pread(bucketsFd, &temp, sizeof(Bucket),i*sizeof(Bucket));
+                        result = pread(bucketsFd, &temp, sizeof(Bucket),data.elements[i].bucketOffset);
                         temp.bucketNumber = i;
+                        cout<<"bucketnumberdub"<<i;
                         if(temp.localDepth == data.globalDepth)
                         {
-                           result = pwrite(bucketsFd,&temp ,sizeof(Bucket), i*sizeof(Bucket));
+                           result = pwrite(bucketsFd,&temp ,sizeof(Bucket), data.elements[i].bucketOffset);
                            i++;
+                           cout<<"error"<<endl;
                         }
                         else
                         {
-                           result = pwrite(bucketsFd,&temp ,sizeof(Bucket), i*sizeof(Bucket));
-                           i = i + 2^(data.globalDepth - temp.localDepth);
+                           result = pwrite(bucketsFd,&temp ,sizeof(Bucket), data.elements[i].bucketOffset);
+                           cout<<i<<endl;
+                           i = i + (int)pow(2,(data.globalDepth - temp.localDepth));
+                           cout<<i<<endl;
+                           cout<<data.globalDepth<<endl;
+                           cout<<temp.localDepth<<endl;
                         }
                      }
                   }
