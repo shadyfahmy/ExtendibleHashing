@@ -29,8 +29,10 @@ public:
     Bucket(/* args */);
     void insertRecord(int,int);
     int hashCode(int key);
-    Bucket* splitBucket(int, int,int, int, bool*, int, int*);
+
     void adjustRecords(int i);
+    Bucket* splitBucket(int, int,int, int, bool*, int, int*, int);
+
     void deleteRecord(Record item);
     ~Bucket();
 };
