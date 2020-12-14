@@ -13,11 +13,13 @@ class Directory
 public:
     /* data */
     int globalDepth;
+    int currentIndex;   //should be incremented after duplicate and decremented after a shrink (how maney indeces we have now in the elements array)
     DirElement elements[MAX_NUMBER_OF_ELEMENTS];
     
     Directory(/* args */);
     void Duplicate(int fd);            // This function duplicates directory
-    void Shrink(int fd);               // This function shrinks directory
+    void Shrink();               // This function shrinks directory
+    void mergeAndShrink(int bucketsFd);
     ~Directory();
 };
 

@@ -17,12 +17,13 @@ class Bucket
 {
 public:
     /* data */
-    int currentIndex;
+    int currentIndex;   /*this now indicates to how maney elements we have not the last index in the array*/
     int localDepth;
     Record records[RECORDS_PER_BUCKET];
 
     Bucket(/* args */);
     void insertRecord(int,int);
+    void deleteRecord(Record item);
     ~Bucket();
 };
 

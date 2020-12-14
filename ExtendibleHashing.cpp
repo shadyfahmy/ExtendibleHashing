@@ -11,12 +11,39 @@ int hashCodeChaining(int key){
 int insertItem(int dirFd, int bucketsFd,Record item){
 }
 
-int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
+int searchItem(int dirFd, int bucketsFd, Record item, int *count) { //returns offset
 
 }
+
 int deleteItem(int dirFd, int bucketsFd, Record item , int *count){
+   int * diff = 0;
 
+   /*   search for the item we need to delete   */
+   int Offset = searchItem(dirFd, bucketsFd, item, diff);
+
+   /*   if not found return -1 indicates to error has happend   */
+   if(Offset<0) {
+      return -1;
+   }
+
+   /*   get the Bucket that has the item, delete the item inside of it and rewrite the data   */
+   Bucket data;
+   pread(bucketsFd,&data,sizeof(Bucket), Offset);
+   data.deleteRecord(item);
+   pwrite(bucketsFd,&data,sizeof(Record), Offset);
+
+   /*   if the bucket still not empty nothing needs to be done   */
+   if(data.currentIndex > 0) {
+      return 0;
+   }
+
+   /*   get the directory data for merge and shrink it after deleting a Bucket*/
+   Directory dir;
+   pread(dirFd,&dir,sizeof(Directory), 0);
+   dir.mergeAndShrink(bucketsFd);
 }
+
+
 int display(int dirFd, int bucketsFd){
    // Displaye Directory
    Directory data;
