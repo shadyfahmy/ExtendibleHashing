@@ -23,6 +23,7 @@ public:
 
     Bucket(/* args */);
     void insertRecord(int,int);
+    int splitBucket(int, int, int, bool*);
     void deleteRecord(Record item);
     ~Bucket();
 };

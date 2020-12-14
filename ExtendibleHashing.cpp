@@ -8,7 +8,83 @@ int hashCode(int key){
    return key % NUMBER_OF_BUCKETS;
 }
 
-int insertItem(int dirFd, int bucketsFd,Record item){
+int insertItem(int dirFd, int bucketsFd,Record item)
+{
+
+   Directory data;
+   Bucket bucketData;
+   ssize_t result = pread(dirFd,&data,sizeof(Directory), 0);
+
+   int hashKey = hashCode(item.key);
+   int targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
+   int targetOffset = data.elements[targetKey].bucketOffset;
+
+   /*No Directory Exists*/
+   if(data.globalDepth == 0)
+   {
+
+   }
+   /*Directory Exists*/
+   else
+   {
+      /*Read target bucket*/
+      result = pread(bucketsFd,&bucketData,sizeof(Bucket), targetOffset);
+      
+      /*Target bucket has free space*/
+      if(bucketData.currentIndex < RECORDS_PER_BUCKET)
+      {
+         bucketData.insertRecord(item.key, item.value);
+         result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), targetOffset);
+      }
+      /*Target bucket is full*/
+      else
+      {
+         bool inserted = false;
+
+         while(!inserted)
+         {
+            targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
+                
+            /*If local depth less than global depth split the bucket*/
+            if(bucketData.localDepth < data.globalDepth)
+            {
+               /*
+               Bucket* newBucket = bucketData->splitBucket(key, val, globalDepth, &inserted);
+
+               for(int i = 0; i < 2^(globalDepth - newBucket->getLocalDepth()); i++)
+               {
+                  data[newBucket->getNumber() + i] = newBucket;
+               }
+               */
+            }
+            /*Dublicate the directory*/
+            else
+            {
+               /*
+               data.resize(2*data.size());
+               for(int i = 0; i < data.size()/2; i++) 
+               {
+                  data[data.size() - 1 - 2*i] = data[data.size()/2- 1 - i] ;
+                  data[data.size() - 1 - 2*i - 1] = data[data.size()/2- 1 - i] ;
+               }
+               globalDepth++;
+               int i = 0;
+               while (i < data.size())
+               {
+                   data[i]->setNumber(i);
+                   if(data[i]->getLocalDepth() == globalDepth)
+                       i++;
+                   else
+                       i = i + 2^(globalDepth - data[i]->getLocalDepth());
+               }
+               */
+
+            }
+         }
+      }
+      
+      
+   }
 }
 
 int searchItem(int dirFd, int bucketsFd, Record item, int *count) {
