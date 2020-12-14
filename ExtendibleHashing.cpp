@@ -74,6 +74,7 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
 
             if(inserted)
             {
+               result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), 0);
                result = pwrite(bucketsFd,&b ,sizeof(Bucket), sizeof(Bucket));
                result = pwrite(dirFd,&data,sizeof(Directory),0);
                return true;
