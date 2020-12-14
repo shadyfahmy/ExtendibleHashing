@@ -37,9 +37,45 @@ void Bucket::deleteRecord(Record item)
    }
 }
 
-int Bucket::splitBucket(int key, int val, int globalDepth, bool* inserted)
+Bucket* Bucket::splitBucket(int key, int val, int* nIndex, int index, int globalDepth, bool* inserted)
 {
+  Bucket* b = new Bucket();
+  *nIndex = index + (2^(globalDepth - localDepth))/2;
+  localDepth++;
+  b->localDepth = this->localDepth;
 
+  for(int i = 0; i < RECORDS_PER_BUCKET; i++)
+  {
+    if((hashCode(this->records[i].key) >> (MAX_BITS_IN_DIRECTORY - globalDepth)) != index)
+    {
+      b->insertRecord(this->records[i].key, this->records[i].value);
+      this->deleteRecord(this->records[i]);
+    }
+
+    int hash = hashCode(key);
+    if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == index && this->currentIndex < RECORDS_PER_BUCKET)
+    {
+      this->insertRecord(key, val);
+      *inserted = true;
+    }
+    else if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == *nIndex && b->currentIndex < RECORDS_PER_BUCKET)
+    {
+      b->insertRecord(key, val);
+      *inserted = true;
+    }
+    else
+    {
+     *inserted = false; 
+    }
+    
+  }
+  
+  return b;
+
+}
+
+int Bucket::hashCode(int key){
+   return key % NUMBER_OF_BUCKETS;
 }
 
 Bucket::~Bucket()

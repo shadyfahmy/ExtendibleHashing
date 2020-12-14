@@ -1,6 +1,9 @@
 #ifndef BUCKET_H_
 #define BUCKET_H_
 #include <bits/stdc++.h>
+#define MAX_BITS_IN_DIRECTORY 5
+#define NUMBER_OF_BUCKETS  (int)pow(2,MAX_BITS_IN_DIRECTORY)    //Maximum Number of BUCKETS
+
 
 
 #define RECORDS_PER_BUCKET 2 //Max No. of records inside each Bucket
@@ -23,7 +26,8 @@ public:
 
     Bucket(/* args */);
     void insertRecord(int,int);
-    int splitBucket(int, int, int, bool*);
+    int hashCode(int key);
+    Bucket* splitBucket(int, int,int*,int, int, bool*);
     void deleteRecord(Record item);
     ~Bucket();
 };

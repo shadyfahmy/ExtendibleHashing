@@ -18,6 +18,7 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
    int hashKey = hashCode(item.key);
    int targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
    int targetOffset = data.elements[targetKey].bucketOffset;
+   bool inserted = false;
 
    /*No Directory Exists*/
    if(data.globalDepth == 0)
@@ -35,11 +36,12 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
       {
          bucketData.insertRecord(item.key, item.value);
          result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), targetOffset);
+         return true;
       }
       /*Target bucket is full*/
       else
       {
-         bool inserted = false;
+         inserted = false;
 
          while(!inserted)
          {
