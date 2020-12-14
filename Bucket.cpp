@@ -1,4 +1,11 @@
-
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+using namespace std;
 #include "Bucket.h"
 
 Bucket::Bucket(/* args */)
@@ -37,39 +44,52 @@ void Bucket::deleteRecord(Record item)
    }
 }
 
-Bucket* Bucket::splitBucket(int key, int val, int* nIndex, int index, int globalDepth, bool* inserted)
+Bucket* Bucket::splitBucket(int key, int val, int bucketNumber, int globalDepth, bool* inserted, int bucketsFd, int* offset)
 {
   Bucket* b = new Bucket();
-  *nIndex = index + (2^(globalDepth - localDepth))/2;
+  int newNumber = bucketNumber + (2^(globalDepth - localDepth))/2;
   localDepth++;
   b->localDepth = this->localDepth;
+  b->bucketNumber = newNumber;
 
   for(int i = 0; i < RECORDS_PER_BUCKET; i++)
   {
-    if((hashCode(this->records[i].key) >> (MAX_BITS_IN_DIRECTORY - globalDepth)) != index)
+    if((hashCode(this->records[i].key) >> (MAX_BITS_IN_DIRECTORY - globalDepth)) != bucketNumber)
     {
       b->insertRecord(this->records[i].key, this->records[i].value);
       this->deleteRecord(this->records[i]);
     }
+  }
 
-    int hash = hashCode(key);
-    if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == index && this->currentIndex < RECORDS_PER_BUCKET)
-    {
-      this->insertRecord(key, val);
-      *inserted = true;
-    }
-    else if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == *nIndex && b->currentIndex < RECORDS_PER_BUCKET)
-    {
-      b->insertRecord(key, val);
-      *inserted = true;
-    }
-    else
-    {
-     *inserted = false; 
-    }
-    
+  int hash = hashCode(key);
+  if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == bucketNumber && this->currentIndex < RECORDS_PER_BUCKET)
+  {
+    this->insertRecord(key, val);
+    *inserted = true;
+  }
+  else if(hash >> (MAX_BITS_IN_DIRECTORY - globalDepth) == newNumber && b->currentIndex < RECORDS_PER_BUCKET)
+  {
+    b->insertRecord(key, val);
+    *inserted = true;
+  }
+  else
+  {
+   *inserted = false; 
   }
   
+  int result;
+  Bucket bucketData;
+  for(int i = 0; i < NUMBER_OF_BUCKETS; i++)
+  {
+    result = pread(bucketsFd, &bucketData, sizeof(Bucket),i*sizeof(Bucket));
+    /*Empty bucket found */
+    if(bucketData.localDepth == 0)
+    {
+      *offset = i*sizeof(Bucket);
+      result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), *offset);
+    }
+  }
+
   return b;
 
 }

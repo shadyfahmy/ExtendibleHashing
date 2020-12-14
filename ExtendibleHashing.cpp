@@ -1,4 +1,5 @@
 #include "readfile.h"
+#include "Bucket.h"
 
 /* Hash function to choose bucket
  * Input: key used to calculate the hash
@@ -36,24 +37,49 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
          {
             data.globalDepth = 1;
             data.currentIndex = 2;
+            bucketData.bucketNumber = 0;
             bucketData.localDepth = 1;
             data.elements[0].bucketOffset = 0;
+
+            Bucket b;
+            b.bucketNumber = 1;
+            b.localDepth = 1;
+            data.elements[1].bucketOffset = sizeof(Bucket);
+
             int targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
             bool inserted = false;
 
-            //data.elements[1].bucketOffset = sizeof(Bucket);
-
-            int nIndex;
-            Bucket* newBucket = bucketData.splitBucket(item.key, item.value, &nIndex, targetKey, data.globalDepth, &inserted);
-            if(inserted)
+            for(int i = 0; i < RECORDS_PER_BUCKET; i++)
             {
-               return true;
+              if((hashCode(bucketData.records[i].key) >> (MAX_BITS_IN_DIRECTORY - data.globalDepth)) != 0)
+              {
+                b.insertRecord(bucketData.records[i].key, bucketData.records[i].value);
+                bucketData.deleteRecord(bucketData.records[i]);
+              }
+            }
+            if(targetKey == 0 && bucketData.currentIndex < RECORDS_PER_BUCKET)
+            {
+              bucketData.insertRecord(item.key, item.value);
+              inserted = true;
+            }
+            else if(targetKey == 1 && b.currentIndex < RECORDS_PER_BUCKET)
+            {
+              b.insertRecord(item.key, item.value);
+              inserted = true;
             }
             else
             {
-               continue;
+             inserted = false; 
             }
 
+            if(inserted)
+            {
+               result = pwrite(bucketsFd,&b ,sizeof(Bucket), sizeof(Bucket));
+               result = pwrite(dirFd,&data,sizeof(Directory),0);
+               return true;
+            }
+            else
+               continue;
          }
 
       }
@@ -72,6 +98,7 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
          {
             bucketData.insertRecord(item.key, item.value);
             result = pwrite(bucketsFd,&bucketData ,sizeof(Bucket), targetOffset);
+            result = pwrite(dirFd,&data,sizeof(Directory),0);
             return true;
          }
 
@@ -82,19 +109,22 @@ bool insertItem(int dirFd, int bucketsFd,Record item)
             {
                targetKey = hashKey >> (MAX_BITS_IN_DIRECTORY - data.globalDepth);
                targetOffset = data.elements[targetKey].bucketOffset;
+               int offset;
 
                /*If local depth less than global depth split the bucket*/
                if(bucketData.localDepth < data.globalDepth)
                {
-                  int nIndex;
-                  Bucket* newBucket = bucketData.splitBucket(item.key, item.value, &nIndex, targetKey, data.globalDepth, &inserted);
+                  Bucket* newBucket = bucketData.splitBucket(item.key, item.value, bucketData.bucketNumber, data.globalDepth, &inserted, bucketsFd, &offset);
 
                   for(int i = 0; i < 2^(data.globalDepth - newBucket->localDepth); i++)
                   {
-                     //data.elements[nIndex + i].bucketOffset = newBucket;
+                     data.elements[newBucket->bucketNumber + i].bucketOffset = offset;
                   }
                   if (inserted)
+                  {
+                     result = pwrite(dirFd,&data,sizeof(Directory),0);
                      return true;
+                  }
                   continue;
 
                }

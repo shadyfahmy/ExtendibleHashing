@@ -1,6 +1,7 @@
 #ifndef BUCKET_H_
 #define BUCKET_H_
 #include <bits/stdc++.h>
+//#include"readfile.h"
 #define MAX_BITS_IN_DIRECTORY 5
 #define NUMBER_OF_BUCKETS  (int)pow(2,MAX_BITS_IN_DIRECTORY)    //Maximum Number of BUCKETS
 
@@ -22,12 +23,13 @@ public:
     /* data */
     int currentIndex;   /*this now indicates to how maney elements we have not the last index in the array*/
     int localDepth;
+    int bucketNumber;
     Record records[RECORDS_PER_BUCKET];
 
     Bucket(/* args */);
     void insertRecord(int,int);
     int hashCode(int key);
-    Bucket* splitBucket(int, int,int*,int, int, bool*);
+    Bucket* splitBucket(int, int,int, int, bool*, int, int*);
     void deleteRecord(Record item);
     ~Bucket();
 };
